@@ -29,7 +29,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
       {files.map((file) => {
         return (
           <li
-            className="list-group-item bg-light d-flex align-items-center row file-item"
+            className="list-group-item bg-light d-flex align-items-center row file-item gx-0"
             key={file.id}
           >
             <>
@@ -39,7 +39,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                     <FontAwesomeIcon icon={faMarkdown} size="lg" />
                   </span>
                   <span
-                    className="col-8 c-link"
+                    className="col-6 c-link"
                     onClick={() => {
                       onFileClick(file.id);
                     }}
@@ -47,7 +47,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                     {file.title}
                   </span>
                   <button
-                    className="col-1 icon-button"
+                    className="col-2 icon-button"
                     onClick={() => {
                       setEditStatus(file.id);
                       setValue(file.title);
@@ -55,15 +55,13 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                   >
                     <FontAwesomeIcon icon={faEdit} size="lg" title="编辑" />
                   </button>
-                  <button className="col-1 icon-button">
-                    <FontAwesomeIcon
-                      icon={faTrash}
-                      size="lg"
-                      title="删除"
-                      onClick={() => {
-                        onFileDelete(file.id);
-                      }}
-                    />
+                  <button
+                    className="col-2 icon-button"
+                    onClick={() => {
+                      onFileDelete(file.id);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faTrash} size="lg" title="删除" />
                   </button>
                 </>
               )}

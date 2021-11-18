@@ -5,12 +5,13 @@ import FileList from "./components/FileList";
 import defaultFiles from "./utils/defaultFile";
 import ButtonBtn from "./components/BottomBtn";
 import { faPlus, faFileImport } from "@fortawesome/free-solid-svg-icons";
+import TabList from "./components/TabList";
 
 function App() {
   return (
-    <div className="App container-fluid">
+    <div className="App container-fluid g-0">
       <div className="row">
-        <div className="col-6 bg-light left-panel">
+        <div className="col-3 bg-light left-panel gx-0">
           <FileSearch
             title="我的云文档"
             onFileSearch={(value) => {
@@ -29,11 +30,11 @@ function App() {
               console.log(id, "save", "value", value);
             }}
           />
-          <div className="row">
-            <div className="col">
+          <div className="row g-0">
+            <div className="col d-grid gap-2">
               <ButtonBtn text="新建" icon={faPlus} colorClass="btn-primary" />
             </div>
-            <div className="col">
+            <div className="col d-grid gap-2">
               <ButtonBtn
                 text="导入"
                 icon={faFileImport}
@@ -42,8 +43,14 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="col-6 bg-primary right-panel">
-          <h1>this is the right</h1>
+        <div className="col-9 right-panel">
+          <TabList
+            files={defaultFiles}
+            activeId="2"
+            onTabClick={(id) => {
+              console.log(id);
+            }}
+          />
         </div>
       </div>
     </div>
