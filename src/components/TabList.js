@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import "./TabList.scss";
 
 const TabList = ({ files, activeId, unsaveIds, onTabClick, onCloseTab }) => {
   return (
-    <ul className="nav nav-pills">
+    <ul className="nav nav-pills tablist-component">
       {files.map((file) => {
+        const withUnsaveMark = unsaveIds.includes(file.id);
         const fClassName = classNames({
           "nav-link": true,
           active: activeId === file.id,
+          withUnsaved: withUnsaveMark,
         });
         return (
           <li className="nav-item" key={file.id}>
@@ -23,9 +26,18 @@ const TabList = ({ files, activeId, unsaveIds, onTabClick, onCloseTab }) => {
               }}
             >
               {file.title}
-              <span className="ms-2">
+              <span
+                className="ms-2 close-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCloseTab(file.id);
+                }}
+              >
                 <FontAwesomeIcon icon={faTimes} />
               </span>
+              {withUnsaveMark && (
+                <span className="rounded-circle unsaved-icon ms-2"></span>
+              )}
             </a>
           </li>
         );
