@@ -2,24 +2,25 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "easymde/dist/easymde.min.css";
 import FileSearch from "./components/FileSearch";
-import React, { useState } from "react";
+import React, { useState , useMemo } from "react";
 import FileList from "./components/FileList";
 import defaultFiles from "./utils/defaultFile";
 import ButtonBtn from "./components/BottomBtn";
 import { faPlus, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import TabList from "./components/TabList";
 import SimpleMDE from "react-simplemde-editor";
+import useKeyPress from "./hooks/useKeyPress";
 
 function App() {
   const [files, setFiles] = useState(defaultFiles);
   const [activeFileID, setActiveFileID] = useState("");
   const [openedFileIDs, setOpenedFileIDs] = useState([]);
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([]);
+  const enterPress = useKeyPress(13);
   const openedFiles = openedFileIDs.map((openID) => {
     return files.find((file) => file.id === openID);
   });
   const activeFile = files.find((file) => file.id === activeFileID);
-  const content = activeFile.body;
   const fileClick = (fileID) => {
     setActiveFileID(fileID);
     if (!openedFileIDs.includes(fileID)) {
@@ -45,18 +46,44 @@ function App() {
     const tabSWithout = openedFileIDs.filter((fileID) => fileID !== id);
     setOpenedFileIDs(tabSWithout);
   };
-  const fileChange = (id, value) => {
-    const newFiles = files.map((file) => {
+  const fileChange = (id,value) => {
+    console.log(value,id)
+    const newFiles = files.map(file => {
       if (file.id === id) {
         file.body = value;
       }
       return file;
     });
-    setFiles(newFiles);
-    if (!unsavedFileIDs.includes(id)) {
-      setUnsavedFileIDs([...unsavedFileIDs, id]);
+    setFiles(newFiles);  
+    if (!unsavedFileIDs.includes(activeFile.id)) {
+      setUnsavedFileIDs([...unsavedFileIDs,activeFile.id]);
     }
-  };
+  }
+  const autofocusNoSpellcheckerOptions = useMemo(() => {
+    return {
+      autofocus: true,
+      spellChecker: false,
+      minHeight: "670px"
+    };
+  }, []);
+  const deleteFile = (id) => {
+    const newFiles = files.filter((file)=>{
+      if(file.id !== id){
+        return file
+      }
+    })
+    setFiles(newFiles)
+  }
+  const saveEdit = (id,value) => {
+    const newFiles = files.map((file) => {
+      if(file.id === id){
+        file.title = value
+      }
+      return file
+    })
+    if(enterPress){setFiles(newFiles)}
+    console.log("ok")
+  }
 
   return (
     <div className="App container-fluid g-0">
@@ -72,10 +99,10 @@ function App() {
             files={files}
             onFileClick={fileClick}
             onFileDelete={(id) => {
-              console.log(id, "delete");
+              deleteFile(id)
             }}
             onSaveEdit={(id, value) => {
-              console.log(id, "save", "value", value);
+              console.log(id,value)
             }}
           />
           <div className="row g-0 button-group">
@@ -107,12 +134,8 @@ function App() {
               <SimpleMDE
                 key={activeFile && activeFile.id}
                 value={activeFile && activeFile.body}
-                onChange={(value) => {
-                  fileChange(activeFile.id, value);
-                }}
-                options={{
-                  minHeight: "670px",
-                }}
+                onChange={(value)=>{fileChange(activeFile.id,value)}}
+                options={autofocusNoSpellcheckerOptions}
               />
             </>
           )}

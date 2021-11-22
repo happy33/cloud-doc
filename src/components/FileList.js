@@ -10,7 +10,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
   const [value, setValue] = useState("");
   const enterPress = useKeyPress(13);
   const escPress = useKeyPress(27);
-  const closeSearch = () => {
+  const closeEdit = () => {
     setEditStatus(false);
     setValue("");
   };
@@ -21,7 +21,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
       setEditStatus(false);
       setValue("");
     } else if (escPress && editStatus) {
-      closeSearch();
+      closeEdit();
     }
   }, []);
   return (
@@ -51,6 +51,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                     onClick={() => {
                       setEditStatus(file.id);
                       setValue(file.title);
+                      onSaveEdit(file.id)
                     }}
                   >
                     <FontAwesomeIcon icon={faEdit} size="lg" title="编辑" />
@@ -77,7 +78,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                   <button
                     type="button"
                     className="icon-button col-2"
-                    onClick={closeSearch}
+                    onClick={closeEdit}
                   >
                     <FontAwesomeIcon icon={faTimes} title="关闭" size="lg" />
                   </button>
