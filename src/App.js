@@ -2,34 +2,52 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "easymde/dist/easymde.min.css";
 import FileSearch from "./components/FileSearch";
-import React, { useState , useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import FileList from "./components/FileList";
 import defaultFiles from "./utils/defaultFile";
 import ButtonBtn from "./components/BottomBtn";
 import { faPlus, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import TabList from "./components/TabList";
 import SimpleMDE from "react-simplemde-editor";
-import useKeyPress from "./hooks/useKeyPress";
+import { v4 as uuidv4 } from "uuid";
+import { flattenArr, objToArr } from "./utils/helper";
 
 function App() {
-  const [files, setFiles] = useState(defaultFiles);
+  const [files, setFiles] = useState(flattenArr(defaultFiles));
+  console.log(files);
   const [activeFileID, setActiveFileID] = useState("");
   const [openedFileIDs, setOpenedFileIDs] = useState([]);
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([]);
-  const enterPress = useKeyPress(13);
+  const [searchedFiles, setsearchedFiles] = useState([]);
+
+  const filesArr = objToArr(files);
+  const activeFile = files[activeFileID];
   const openedFiles = openedFileIDs.map((openID) => {
-    return files.find((file) => file.id === openID);
+    return files[openID];
   });
-  const activeFile = files.find((file) => file.id === activeFileID);
+  const fileListArr = searchedFiles.length > 0 ? searchedFiles : filesArr;
+  //新建文件
+  const createNewFile = () => {
+    const newID = uuidv4();
+    fileChangePart(newID, {
+      id: newID,
+      body: "## 请输出MarkDown",
+      title: "",
+      isNew: true,
+    });
+  };
+  //点击文件栏
   const fileClick = (fileID) => {
     setActiveFileID(fileID);
     if (!openedFileIDs.includes(fileID)) {
       setOpenedFileIDs([...openedFileIDs, fileID]);
     }
   };
+  //点击tab栏
   const tabClick = (fileID) => {
     setActiveFileID(fileID);
   };
+  //关闭tab标签
   const tabClose = (id) => {
     const tabIndex = openedFileIDs.indexOf(id);
     if (id === activeFileID) {
@@ -43,71 +61,68 @@ function App() {
         setActiveFileID("");
       }
     }
-    const tabSWithout = openedFileIDs.filter((fileID) => fileID !== id);
-    setOpenedFileIDs(tabSWithout);
+    const tabsWithout = openedFileIDs.filter((fileID) => fileID !== id);
+    setOpenedFileIDs(tabsWithout);
   };
-  const fileChange = (id,value) => {
-    console.log(value,id)
-    const newFiles = files.map(file => {
-      if (file.id === id) {
-        file.body = value;
-      }
-      return file;
-    });
-    setFiles(newFiles);  
+  //文件局部改变
+  const fileChangePart = (id, obj) => {
+    const newFile = { ...files[id], ...obj };
+    setFiles({ ...files, [id]: newFile });
+  };
+  //编辑文件内容
+  const fileChange = (id, value) => {
+    fileChangePart(id, { body: value });
     if (!unsavedFileIDs.includes(activeFile.id)) {
-      setUnsavedFileIDs([...unsavedFileIDs,activeFile.id]);
+      setUnsavedFileIDs([...unsavedFileIDs, activeFile.id]);
     }
-  }
+  };
+  //自动focus
   const autofocusNoSpellcheckerOptions = useMemo(() => {
     return {
       autofocus: true,
       spellChecker: false,
-      minHeight: "670px"
+      minHeight: "670px",
     };
   }, []);
+  //文件栏删除文件
   const deleteFile = (id) => {
-    const newFiles = files.filter((file)=>{
-      if(file.id !== id){
-        return file
-      }
-    })
-    setFiles(newFiles)
-  }
-  const saveEdit = (id,value) => {
-    const newFiles = files.map((file) => {
-      if(file.id === id){
-        file.title = value
-      }
-      return file
-    })
-    if(enterPress){setFiles(newFiles)}
-    console.log("ok")
-  }
+    delete files[id];
+    setFiles(files);
+    tabClose(id);
+  };
+  //编辑文件名
+  const updateFileName = (id, value) => {
+    fileChangePart(id, { title: value, isNew: false });
+  };
+  //搜索文件
+  const fileSearch = (key) => {
+    const searchedFileList = filesArr.filter((file) =>
+      file.title.includes(key)
+    );
+    setsearchedFiles(searchedFileList);
+  };
 
   return (
     <div className="App container-fluid g-0">
       <div className="row">
         <div className="col-3 bg-light left-panel gx-0">
-          <FileSearch
-            title="我的云文档"
-            onFileSearch={(value) => {
-              console.log(value);
-            }}
-          />
+          <FileSearch title="我的云文档" onFileSearch={fileSearch} />
           <FileList
-            files={files}
+            files={fileListArr}
             onFileClick={fileClick}
             onFileDelete={(id) => {
-              deleteFile(id)
+              deleteFile(id);
             }}
-            onSaveEdit={(id, value) => {
-              console.log(id,value)
-            }}
+            onSaveEdit={updateFileName}
           />
           <div className="row g-0 button-group">
             <div className="col d-grid gap-2">
-              <ButtonBtn text="新建" icon={faPlus} colorClass="btn-primary" />
+              <ButtonBtn
+                text="新建"
+                icon={faPlus}
+                colorClass="btn-primary"
+                onBtnClick={createNewFile}
+              />
             </div>
             <div className="col d-grid gap-2">
               <ButtonBtn
@@ -134,7 +149,9 @@ function App() {
               <SimpleMDE
                 key={activeFile && activeFile.id}
                 value={activeFile && activeFile.body}
-                onChange={(value)=>{fileChange(activeFile.id,value)}}
+                onChange={(value) => {
+                  fileChange(activeFile.id, value);
+                }}
                 options={autofocusNoSpellcheckerOptions}
               />
             </>
