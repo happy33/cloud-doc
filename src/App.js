@@ -11,10 +11,11 @@ import TabList from "./components/TabList";
 import SimpleMDE from "react-simplemde-editor";
 import { v4 as uuidv4 } from "uuid";
 import { flattenArr, objToArr } from "./utils/helper";
+const fs = window.require("fs");
+console.log(fs);
 
 function App() {
   const [files, setFiles] = useState(flattenArr(defaultFiles));
-  console.log(files);
   const [activeFileID, setActiveFileID] = useState("");
   const [openedFileIDs, setOpenedFileIDs] = useState([]);
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([]);
