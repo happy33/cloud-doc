@@ -1,6 +1,8 @@
 const { app, BrowserWindow } = require("electron");
 const isDev = require("electron-is-dev");
 let mainwindow;
+const Store = require('electron-store')
+Store.initRenderer()
 
 app.on("ready", () => {
   mainwindow = new BrowserWindow({
@@ -16,4 +18,5 @@ app.on("ready", () => {
 
   require("@electron/remote/main").initialize();
   require("@electron/remote/main").enable(mainwindow.webContents);
+  
 });
